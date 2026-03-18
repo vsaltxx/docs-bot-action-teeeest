@@ -43,7 +43,7 @@ jobs:
       - name: Run synchronization to Jira
         uses: vsaltxx/sync-jira-actions@fix/pr-authored-by-bot
         with:
-          cron_job: ${{ github.event_name == 'schedule' && 'true' || '' }}
+          cron_job: 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JIRA_PASS: ${{ secrets.JIRA_PASS }}
