@@ -41,7 +41,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run synchronization to Jira
-        uses: vsaltxx/sync-jira-actions@v1
+        uses: vsaltxx/sync-jira-actions@fix/pr-authored-by-bot
         with:
           cron_job: ${{ github.event_name == 'schedule' && 'true' || '' }}
         env:
