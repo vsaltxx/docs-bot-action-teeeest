@@ -1,0 +1,26 @@
+name: create-bot-pr
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create change
+        run: |
+          echo "bot change $(date)" >> bot.txt
+
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: bot/test-pr
+          title: "PR from bot"
+          
