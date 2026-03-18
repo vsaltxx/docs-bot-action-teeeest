@@ -46,8 +46,8 @@ jobs:
           cron_job: 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          JIRA_PASS: ${{ secrets.JIRA_PASS }}
-          JIRA_PROJECT: IDFGH
+          JIRA_PASS: dummy
+          JIRA_PROJECT: DUMMY
           JIRA_COMPONENT: tools
-          JIRA_URL: ${{ secrets.JIRA_URL }}
-          JIRA_USER: ${{ secrets.JIRA_USER }}
+          JIRA_URL: http://localhost
+          JIRA_USER: dummy
