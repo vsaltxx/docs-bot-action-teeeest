@@ -41,7 +41,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run synchronization to Jira
-        uses: vsaltxx/sync-jira-actions@fix/pr-authored-by-bot
+        uses: vsaltxx/sync-jira-actions@a4881c7b3678a83ca8978ae575420abd5be7b666
         with:
           cron_job: 'true'
         env:
