@@ -41,13 +41,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run synchronization to Jira
-        uses: espressif/sync-jira-actions@v1
+        uses: vsaltxx/sync-jira-actions@v1
         with:
           cron_job: ${{ github.event_name == 'schedule' && 'true' || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JIRA_PASS: ${{ secrets.JIRA_PASS }}
-          JIRA_PROJECT: IDFGH
-          JIRA_COMPONENT: tools
+          JIRA_PROJECT: ${{ secrets.JIRA_PROJECT }}
+          JIRA_COMPONENT: test-component
           JIRA_URL: ${{ secrets.JIRA_URL }}
           JIRA_USER: ${{ secrets.JIRA_USER }}
