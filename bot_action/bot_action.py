@@ -18,8 +18,11 @@ request overhead.
 QUERY_LIMIT = 14000
 
 
-def get_suggestion(issue_body: str) -> str:
-    payload = json.dumps({'integration_id': os.environ['BOT_INTEGRATION_ID'], 'query': issue_body})
+def get_suggestion(issue_body: str, thread_id: str | None = None) -> tuple[str, str | None]:
+    data: dict = {'integration_id': os.environ['BOT_INTEGRATION_ID'], 'query': issue_body}
+    if thread_id:
+        data['thread_id'] = thread_id
+    payload = json.dumps(data)
 
     headers = {'content-type': 'application/json', 'X-API-KEY': os.environ['BOT_API_KEY']}
     r = requests.post(os.environ['BOT_API_ENDPOINT'], data=payload, headers=headers)
@@ -33,7 +36,7 @@ def get_suggestion(issue_body: str) -> str:
 
     assert isinstance(answer, str), 'No answer found'
 
-    return answer
+    return answer, j.get('thread_id')
 
 
 def shorten_backtick_blocks(text: str) -> str:
@@ -78,6 +81,10 @@ def shorten_backtick_blocks(text: str) -> str:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('input_file', type=str, default=None)
+    parser.add_argument('--thread-id', type=str, default=None, help='Thread ID for follow-up conversation context.')
+    parser.add_argument(
+        '--thread-id-output', type=str, default=None, help='File to write the thread ID returned by the bot.'
+    )
     args = parser.parse_args()
 
     text_reducing_heuristics = (shorten_backtick_blocks,)
@@ -88,7 +95,11 @@ def main():
             if len(input_text) > QUERY_LIMIT:
                 for heuristic in text_reducing_heuristics:
                     input_text = heuristic(input_text)
-            print(get_suggestion(input_text))
+            answer, thread_id = get_suggestion(input_text, args.thread_id)
+            print(answer)
+            if args.thread_id_output and thread_id:
+                with open(args.thread_id_output, 'w', encoding='utf-8') as f:
+                    f.write(thread_id)
 
 
 if __name__ == '__main__':

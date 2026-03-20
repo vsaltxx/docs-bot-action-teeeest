@@ -33,6 +33,19 @@ inputs:
     description: Post this message together with the bot's response. Can be used for warnings, disclaimers and similar.
     required: false
     default: ''
+  thread_id:
+    description: >
+      Thread ID from a previous bot response. When provided, the bot will continue the existing conversation thread,
+      giving it full context of prior exchanges. Obtain this value from the thread_id output of a previous run.
+    required: false
+    default: ''
+
+outputs:
+  thread_id:
+    description: >
+      Thread ID of the conversation started or continued by this run. Pass this value back as the thread_id input on
+      subsequent runs to allow the bot to answer follow-up questions with full conversation context.
+    value: ${{ steps.read-thread-id.outputs.thread_id }}
 
 runs:
   using: composite
@@ -71,12 +84,27 @@ runs:
         INPUT_TITLE: ${{ inputs.title }}
         INPUT_IN_MSG: ${{ inputs.in_msg }}
         INPUT_PREFIX_OUT_MSG: ${{ inputs.prefix_out_msg }}
+        INPUT_THREAD_ID: ${{ inputs.thread_id }}
       run: |
         source venv/bin/activate
         printf '%s\n%s\n%s\n' "$INPUT_BOT_QUERY_PREFIX" "$INPUT_TITLE" "$INPUT_IN_MSG" > input.txt
         printf '%s\n' "$INPUT_PREFIX_OUT_MSG" > output.txt
         printf '\n---\n' >> output.txt
-        python bot_action/bot_action.py input.txt >> output.txt || exit 1
+        if [ -n "$INPUT_THREAD_ID" ]; then
+          python bot_action/bot_action.py input.txt --thread-id "$INPUT_THREAD_ID" --thread-id-output thread_id.txt >> output.txt || exit 1
+        else
+          python bot_action/bot_action.py input.txt --thread-id-output thread_id.txt >> output.txt || exit 1
+        fi
+
+    - name: Read thread ID and embed in comment
+      id: read-thread-id
+      shell: bash
+      run: |
+        if [ -f thread_id.txt ]; then
+          THREAD_ID=$(cat thread_id.txt)
+          echo "thread_id=$THREAD_ID" >> "$GITHUB_OUTPUT"
+          printf '\n<!-- bot_thread_id: %s -->\n' "$THREAD_ID" >> output.txt
+        fi
 
     - name: Archive artifacts
       uses: actions/upload-artifact@v4
